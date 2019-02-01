@@ -11,7 +11,7 @@
 ## postman 断言
 将 postman 断言添加至用例中，但目前只支持以下 2 种断言方法，断言需具体到字段
 
-```json
+```
 案例一:
 var jsonData = pm.response.json();
 pm.test("检查Response Body 是否包含'hello'字符串", function () {
