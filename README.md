@@ -1,15 +1,15 @@
 # postman2Testcase
-将 postman json 文件转换为 HttpRunner YAML/JSON 用例
+将 `postman json 文件` 转换为 `HttpRunner YAML/JSON 用例` 
 
 ## 用法
 
-```shell
+```
 1.运行 app.py
 2.通过 http://127.0.0.1:5000/index 访问
 ```
 
 ## postman 断言
-将 postman 断言添加至用例中，但目前只支持以下 2 种断言方法，断言需具体到字段
+将 `postman 断言`添加至用例中，但目前只支持以下 2 种断言方法，断言需具体到字段
 
 ```
 案例一:
