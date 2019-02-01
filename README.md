@@ -15,7 +15,7 @@
 案例一:
 var jsonData = pm.response.json();
 pm.test("检查Response Body 是否包含'hello'字符串", function () {
-    pm.expect(jsonData.responseBody.resultList[0].name).to.eql("hello");
+pm.expect(jsonData.responseBody.resultList[0].name).to.eql("hello");
 });
 
 案例二：
