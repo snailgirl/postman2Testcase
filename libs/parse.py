@@ -191,6 +191,8 @@ class HpptrunnerCase():
         :param mode_body:
         :return:
         """
+        if isinstance(mode_body,bool):
+            return mode_body
         # 处理 {{param}}无引号参数
         re_str = re.findall('''[^"']{{(\w*)}}[^"]''', mode_body)
         for conver_str in re_str:
