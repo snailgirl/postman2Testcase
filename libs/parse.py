@@ -3,8 +3,6 @@ import os
 import re
 from ruamel import yaml
 
-input_file = r'D:\code_projects\test_code\postman2Testcase\data\医馆中心(开发测试).json'
-
 class HpptrunnerCase():
     def __init__(self):
         # 存储用例
@@ -54,9 +52,11 @@ class HpptrunnerCase():
     def get_each_case(self, item):
         """ parse each item in postman to testcase in httprunner
         """
-        testcase = {}
+        testcase_test={}
+        testcase_test['test'] = {}
+        testcase = testcase_test['test']
         testcase["name"] = item["name"]
-        testcase["def"] = item["name"]
+        # testcase["def"] = item["name"]
         testcase["validate"] = []
         testcase["variables"] = []
         testcase["extract"]=[]
@@ -64,8 +64,7 @@ class HpptrunnerCase():
 
         # variables、validate和extract字段内容
         validate_list = []
-        testcase["validate"].append({'eq': ['status_code', 200  ]})
-        testcase["validate"].append({'eq': ['content.status', 'SUCCESS']})
+        testcase["validate"].append({'eq': ['status_code', 200]})
         if 'event' in item:
             event_res = self.get_event_content(item['event'])
             # testcase["variables"]
@@ -96,7 +95,7 @@ class HpptrunnerCase():
 
             headers = {}
             for header in item["request"]["header"]:
-                headers[header["key"]] = header["value"]
+                headers[header["key"]] = header["value"].replace("{{", "$").replace("}}", "")
             request["headers"] = headers
 
             body = {}
@@ -118,15 +117,16 @@ class HpptrunnerCase():
                 # 处理{{param}}参数
                 mode_body = self.get_param(mode_body)
                 if mode in ['raw']:
-                    mode_body_new = json.loads(mode_body)
-                    if isinstance(mode_body_new, dict):
-                        # 处理body参数添加至testcase['variables']
-                        get_varia_parm(mode_body_new)
-                    elif isinstance(mode_body_new, list):
-                        for list_item in mode_body_new:
+                    if mode_body:
+                        mode_body_new = json.loads(mode_body)
+                        if isinstance(mode_body_new, dict):
                             # 处理body参数添加至testcase['variables']
-                            get_varia_parm(list_item)
-                        body = [body]
+                            get_varia_parm(mode_body_new)
+                        elif isinstance(mode_body_new, list):
+                            for list_item in mode_body_new:
+                                # 处理body参数添加至testcase['variables']
+                                get_varia_parm(list_item)
+                            body = [body]
                 else:
                     mode_body_new = eval(mode_body)
                     for param in mode_body_new:
@@ -141,7 +141,7 @@ class HpptrunnerCase():
             request["url"] = url.split("?")[0].replace("{{", "$").replace("}}", "")
             headers = {}
             for header in item["request"]["header"]:
-                headers[header["key"]] = header["value"]
+                headers[header["key"]] = header["value"].replace("{{", "$").replace("}}", "")
             request["headers"] = headers
 
             body = {}
@@ -163,8 +163,7 @@ class HpptrunnerCase():
         testcase['extract'] = extract
         validate = testcase.pop('validate')
         testcase['validate'] = validate
-
-        return testcase
+        return testcase_test
 
     def parse_value_from_type(self, value):
         '''
@@ -191,9 +190,9 @@ class HpptrunnerCase():
         :param mode_body:
         :return:
         """
+        # 处理 {{param}}无引号参数
         if isinstance(mode_body,bool):
             return mode_body
-        # 处理 {{param}}无引号参数
         re_str = re.findall('''[^"']{{(\w*)}}[^"]''', mode_body)
         for conver_str in re_str:
             new_str = mode_body.replace('{{' + conver_str + '}}', '"$' + conver_str + '"')
@@ -220,7 +219,7 @@ class HpptrunnerCase():
                 res_item = result_item[0].replace('[', '.').replace(']', '')
                 validate_key = 'content.' + res_item
                 # black_list 不保存的断言(黑名单)
-                black_list = ['status_code', 'content.status']
+                black_list = ['status_code']
                 if validate_key not in black_list:
                     validate_value = result_item[1].strip('"')
                     validate_res[validate_key] = validate_value
@@ -255,9 +254,9 @@ class HpptrunnerCase():
                             validate_res = get_validate(validate_res, validate_result)
 
                         # extract 保存response指定参数，数据处理
-                        extract_result = re.findall('globals.set\(\"(.*)\",.*\.responseBody(.*)\)', validate_item.replace(' ', ''))
+                        extract_result = re.findall('globals.set\(\"(.*)\",\w*\.(.*)\)', validate_item.replace(' ', ''))
                         if extract_result:
                             for extract_item in extract_result:
-                                extract_val = 'content.responseBody' + extract_item[1].replace('[', '.').replace(']', '')
+                                extract_val = 'content.' + extract_item[1].replace('[', '.').replace(']', '')
                                 extract_res[extract_item[0]] = extract_val.replace('"', '')
         return variables_res, validate_res, extract_res
