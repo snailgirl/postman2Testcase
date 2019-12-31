@@ -15,12 +15,12 @@
 案例一:
 var jsonData = pm.response.json();
 pm.test("检查Response Body 是否包含'hello'字符串", function () {
-    pm.expect(jsonData.responseBody.resultList[0].name).to.eql("hello");
+    pm.expect(jsonData.resultList[0].name).to.eql("hello");
 });
 
 案例二：
-var data = JSON.parse(responseBody);
-tests["字段返回是否hello"] = data.responseBody.resultList[0].name === "hello"; 
+var jsonData = JSON.parse(responseBody);
+tests["字段返回是否hello"] = jsonData.resultList[0].name === "hello"; 
 
 ```
 
